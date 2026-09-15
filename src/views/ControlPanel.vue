@@ -5,8 +5,6 @@ import { message } from "ant-design-vue";
 import {
   DeleteOutlined,
   EditOutlined,
-  EyeInvisibleOutlined,
-  EyeOutlined,
   InboxOutlined,
   PlusOutlined,
   RightOutlined,
@@ -310,7 +308,7 @@ const goHome = () => router.push({ name: "home" });
       wrap-class-name="user-modal"
       :title="isEditing ? 'Edit User' : 'Add New User'"
     >
-      <form class="user-form" @submit.prevent="submit">
+      <form class="user-form" autocomplete="off" @submit.prevent="submit">
         <div class="field">
           <label class="field-label" for="user-name">
             User Name<span class="req">*</span>
@@ -330,6 +328,8 @@ const goHome = () => router.push({ name: "home" });
           <a-input
             id="user-login"
             v-model:value="form.userId"
+            name="portal-user-login"
+            autocomplete="off"
             placeholder="Login id"
           />
           <p v-if="errors.userId" class="field-error">{{ errors.userId }}</p>
@@ -342,6 +342,8 @@ const goHome = () => router.push({ name: "home" });
           <a-input-password
             id="user-password"
             v-model:value="form.password"
+            name="portal-user-password"
+            autocomplete="new-password"
             placeholder="Password"
           />
           <p v-if="errors.password" class="field-error">{{ errors.password }}</p>

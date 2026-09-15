@@ -176,7 +176,6 @@ const goToBusiness = () =>
               disabled
               class="locked-input"
             />
-            <p class="field-hint">Locked for edit</p>
           </div>
         </div>
 
@@ -248,7 +247,7 @@ const goToBusiness = () =>
                 </a-button>
               </a-upload>
 
-              <a-radio-group v-model:value="mode[item.key]">
+              <a-radio-group v-model:value="mode[item.key]" class="attach-mode">
                 <a-radio value="add">Add</a-radio>
                 <a-radio value="replace">Replace</a-radio>
               </a-radio-group>
@@ -299,7 +298,7 @@ const goToBusiness = () =>
                 </a-button>
               </a-upload>
 
-              <a-radio-group v-model:value="mode.finalReport">
+              <a-radio-group v-model:value="mode.finalReport" class="attach-mode">
                 <a-radio value="add">Add</a-radio>
                 <a-radio value="replace">Replace</a-radio>
               </a-radio-group>
@@ -349,12 +348,15 @@ $border: #dfe4ea;
 }
 
 .crumb-link {
+  max-width: 100%;
   padding: 0;
   border: none;
   background: none;
   font: inherit;
   font-weight: 600;
   color: $brand-700;
+  text-align: start;
+  overflow-wrap: anywhere;
   cursor: pointer;
 
   &:hover {
@@ -383,27 +385,32 @@ $border: #dfe4ea;
 .field {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
+  gap: clamp(10px, 1.6vw, 16px);
   margin-bottom: 18px;
 }
 
+/* label keeps its own column at every width, narrowing as the viewport does */
 .field-label {
-  width: 170px;
+  width: clamp(96px, 22vw, 170px);
   flex-shrink: 0;
   padding-top: 6px;
   text-align: end;
   font-size: 14px;
   font-weight: 600;
+  line-height: 1.3;
   color: $ink;
+  overflow-wrap: break-word;
 }
 
 .field-control {
   flex: 1 1 auto;
+  align-self: stretch;
   min-width: 0;
 }
 
 .full {
   width: 100%;
+  max-width: 100%;
 }
 
 .locked-input {
@@ -414,6 +421,7 @@ $border: #dfe4ea;
 .field-hint {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 5px;
   margin: 6px 0 0;
   font-size: 11.5px;
@@ -434,13 +442,32 @@ $border: #dfe4ea;
   flex-wrap: wrap;
 }
 
+/* the picked-file list lives inside this wrapper, so it needs room to shrink */
 .attach-upload {
+  flex: 0 1 420px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.attach-mode {
   flex: 0 0 auto;
 }
 
 .attach-btn {
   min-width: 160px;
+  max-width: 100%;
   text-align: start;
+}
+
+/* long file names stay inside the card instead of widening the row */
+.attach-upload :deep(.ant-upload-list) {
+  max-width: 100%;
+}
+
+.attach-upload :deep(.ant-upload-list-item-name) {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 /* ---------- actions ---------- */
@@ -481,20 +508,60 @@ $border: #dfe4ea;
 }
 
 /* ---------- breakpoints ---------- */
-@media (max-width: 639.98px) {
+
+/* tablets: label stays beside its control, the column just gets narrower */
+@media (max-width: 767.98px) {
+  .field {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .attach-upload {
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 575.98px) {
   .form-card {
-    padding: 18px 14px;
+    padding: 18px 12px;
   }
 
   .field {
-    flex-direction: column;
-    gap: 6px;
+    gap: 10px;
   }
 
   .field-label {
-    width: auto;
-    padding-top: 0;
-    text-align: start;
+    padding-top: 7px;
+    font-size: 13px;
+  }
+
+  /* upload trigger and the add/replace choice each get their own line */
+  .attach-row {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .attach-btn {
+    width: 100%;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .form-actions :deep(.ant-btn) {
+    width: 100%;
+  }
+
+  /* 16px keeps iOS Safari from zooming in when a field takes focus */
+  .field-control :deep(.ant-input),
+  .field-control :deep(.ant-select-selector),
+  .field-control :deep(.ant-picker-input > input) {
+    font-size: 16px;
   }
 }
 </style>

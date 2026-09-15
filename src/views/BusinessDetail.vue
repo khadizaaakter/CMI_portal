@@ -545,18 +545,40 @@ $border: #dfe4ea;
   color: #b6c6da;
 }
 
-.view-link {
+%table-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  border: 1px solid #bcdffb;
-  border-radius: 4px;
-  background: $brand-50;
+  justify-content: center;
+  gap: 6px;
+  min-width: 78px;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  color: $brand-700;
+  line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.35);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.view-link {
+  @extend %table-btn;
+
+  border-color: #bcdffb;
+  background: $brand-50;
+  color: $brand-700;
 
   &:hover {
     background: #d3e8fd;
@@ -565,22 +587,15 @@ $border: #dfe4ea;
 }
 
 .edit-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  border: 1px solid $brand-200;
-  border-radius: 4px;
-  background: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  color: $brand-900;
-  cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  @extend %table-btn;
+
+  border-color: $brand-700;
+  background: $brand-700;
+  color: #fff;
 
   &:hover {
-    background: $brand-50;
-    border-color: $brand-500;
+    background: $brand-900;
+    border-color: $brand-900;
   }
 }
 
