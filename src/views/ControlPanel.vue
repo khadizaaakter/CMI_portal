@@ -1,4 +1,4 @@
-<script setup>
+ <script setup>
 import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { message } from "ant-design-vue";
@@ -316,7 +316,7 @@ const goHome = () => router.push({ name: "home" });
           <a-input
             id="user-name"
             v-model:value="form.name"
-            placeholder="e.g. ACI CB Hygiene"
+            placeholder="Enter user name"
           />
           <p v-if="errors.name" class="field-error">{{ errors.name }}</p>
         </div>
@@ -330,7 +330,7 @@ const goHome = () => router.push({ name: "home" });
             v-model:value="form.userId"
             name="portal-user-login"
             autocomplete="off"
-            placeholder="Login id"
+            placeholder="Enter User ID"
           />
           <p v-if="errors.userId" class="field-error">{{ errors.userId }}</p>
         </div>
@@ -344,7 +344,7 @@ const goHome = () => router.push({ name: "home" });
             v-model:value="form.password"
             name="portal-user-password"
             autocomplete="new-password"
-            placeholder="Password"
+            placeholder="Enter password"
           />
           <p v-if="errors.password" class="field-error">{{ errors.password }}</p>
         </div>
