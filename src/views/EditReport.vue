@@ -167,79 +167,106 @@ const goToBusiness = () =>
 
       <!-- ---------- form ---------- -->
       <form class="form-card" @submit.prevent="save">
-        <div class="field">
-          <label class="field-label" for="business-name">Business Name</label>
-          <div class="field-control">
-            <a-input
-              id="business-name"
-              :value="business.name"
-              disabled
-              class="locked-input"
-            />
+        <!-- two label + control pairs per row; attachments close the grid -->
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" for="business-name">Business Name</label>
+            <div class="field-control">
+              <a-input
+                id="business-name"
+                :value="business.name"
+                disabled
+                class="locked-input"
+              />
+            </div>
           </div>
-        </div>
 
-        <div class="field">
-          <label class="field-label" for="study-topic">Study Topic</label>
-          <div class="field-control">
-            <a-input
-              id="study-topic"
-              v-model:value="form.topic"
-              placeholder="Study topic"
-            />
-            <p v-if="errors.topic" class="field-error">{{ errors.topic }}</p>
+          <div class="field">
+            <label class="field-label" for="study-topic">
+              Study Topic<span class="req">*</span>
+            </label>
+            <div class="field-control">
+              <a-input
+                id="study-topic"
+                v-model:value="form.topic"
+                placeholder="Study topic"
+              />
+              <p v-if="errors.topic" class="field-error">{{ errors.topic }}</p>
+            </div>
           </div>
-        </div>
 
-        <div class="field">
-          <label class="field-label" for="study-type">Study Type</label>
-          <div class="field-control">
-            <a-select
-              id="study-type"
-              v-model:value="form.studyType"
-              class="full"
-              placeholder="Select study type"
-              :options="STUDY_TYPES.map((t) => ({ value: t, label: t }))"
-            />
-            <p v-if="errors.studyType" class="field-error">
-              {{ errors.studyType }}
-            </p>
+          <div class="field">
+            <label class="field-label" for="study-type">
+              Study Type<span class="req">*</span>
+            </label>
+            <div class="field-control">
+              <a-select
+                id="study-type"
+                v-model:value="form.studyType"
+                class="full"
+                placeholder="Qualitative / Quantitative / Mixed Method"
+                :options="STUDY_TYPES.map((t) => ({ value: t, label: t }))"
+              />
+              <p v-if="errors.studyType" class="field-error">
+                {{ errors.studyType }}
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div class="field">
-          <label class="field-label" for="brand">Brand</label>
-          <div class="field-control">
-            <a-input id="brand" v-model:value="form.brand" placeholder="Brand" />
+          <div class="field">
+            <label class="field-label" for="brand">Brand</label>
+            <div class="field-control">
+              <a-input
+                id="brand"
+                v-model:value="form.brand"
+                placeholder="Brand"
+              />
+            </div>
           </div>
-        </div>
 
-        <div class="field">
-          <label class="field-label" for="category">Category</label>
-          <div class="field-control">
-            <a-input
-              id="category"
-              v-model:value="form.category"
-              placeholder="Category"
-            />
+          <div class="field">
+            <label class="field-label" for="category">Category</label>
+            <div class="field-control">
+              <a-input
+                id="category"
+                v-model:value="form.category"
+                placeholder="Category"
+              />
+            </div>
           </div>
-        </div>
 
-        <!-- brief + proposal share the attachment row layout -->
-        <div
-          v-for="item in ATTACHMENTS.slice(0, 2)"
-          :key="item.key"
-          class="field"
-        >
-          <span class="field-label">{{ item.label }}</span>
-          <div class="field-control">
-            <div class="attach-row">
+          <div class="field">
+            <label class="field-label" for="complete-date">
+              Complete Date<span class="req">*</span>
+            </label>
+            <div class="field-control">
+              <a-date-picker
+                id="complete-date"
+                v-model:value="form.completionTime"
+                picker="month"
+                format="MMMM YYYY"
+                class="full"
+                placeholder="Month & year (e.g. August 2026)"
+              />
+              <p v-if="errors.completionTime" class="field-error">
+                {{ errors.completionTime }}
+              </p>
+            </div>
+          </div>
+
+          <!-- brief + proposal share a row; study report takes the last one -->
+          <div
+            v-for="item in ATTACHMENTS.slice(0, 2)"
+            :key="item.key"
+            class="field"
+          >
+            <span class="field-label">{{ item.label }}</span>
+            <div class="field-control">
               <a-upload
                 multiple
                 :file-list="files[item.key]"
                 :before-upload="holdFile(item.key)"
                 :remove="removeFile(item.key)"
-                class="attach-upload"
               >
                 <a-button class="attach-btn">
                   <template #icon><UploadOutlined /></template>
@@ -251,46 +278,26 @@ const goToBusiness = () =>
                 <a-radio value="add">Add</a-radio>
                 <a-radio value="replace">Replace</a-radio>
               </a-radio-group>
+
+              <p class="field-hint">
+                <PaperClipOutlined />
+                {{ keptCount(item.key) }} existing
+                <template v-if="files[item.key].length">
+                  + {{ files[item.key].length }} new
+                </template>
+              </p>
             </div>
-
-            <p class="field-hint">
-              <PaperClipOutlined />
-              {{ keptCount(item.key) }} existing
-              <template v-if="files[item.key].length">
-                + {{ files[item.key].length }} new
-              </template>
-            </p>
           </div>
-        </div>
 
-        <div class="field">
-          <label class="field-label" for="complete-date">Complete Date</label>
-          <div class="field-control">
-            <a-date-picker
-              id="complete-date"
-              v-model:value="form.completionTime"
-              picker="month"
-              format="MMMM YYYY"
-              class="full"
-              placeholder="Select month"
-            />
-            <p v-if="errors.completionTime" class="field-error">
-              {{ errors.completionTime }}
-            </p>
-          </div>
-        </div>
-
-        <!-- study report keeps the same attachment controls -->
-        <div class="field">
-          <span class="field-label">Study Report</span>
-          <div class="field-control">
-            <div class="attach-row">
+          <!-- study report keeps the same attachment controls -->
+          <div class="field">
+            <span class="field-label">Study Report</span>
+            <div class="field-control">
               <a-upload
                 multiple
                 :file-list="files.finalReport"
                 :before-upload="holdFile('finalReport')"
                 :remove="removeFile('finalReport')"
-                class="attach-upload"
               >
                 <a-button class="attach-btn">
                   <template #icon><UploadOutlined /></template>
@@ -298,19 +305,22 @@ const goToBusiness = () =>
                 </a-button>
               </a-upload>
 
-              <a-radio-group v-model:value="mode.finalReport" class="attach-mode">
+              <a-radio-group
+                v-model:value="mode.finalReport"
+                class="attach-mode"
+              >
                 <a-radio value="add">Add</a-radio>
                 <a-radio value="replace">Replace</a-radio>
               </a-radio-group>
-            </div>
 
-            <p class="field-hint">
-              <PaperClipOutlined />
-              {{ keptCount("finalReport") }} existing
-              <template v-if="files.finalReport.length">
-                + {{ files.finalReport.length }} new
-              </template>
-            </p>
+              <p class="field-hint">
+                <PaperClipOutlined />
+                {{ keptCount("finalReport") }} existing
+                <template v-if="files.finalReport.length">
+                  + {{ files.finalReport.length }} new
+                </template>
+              </p>
+            </div>
           </div>
         </div>
 
@@ -382,19 +392,25 @@ $border: #dfe4ea;
   background: #fff;
 }
 
+/* two fields per row; each column holds one label + control pair */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+  row-gap: 18px;
+}
+
 .field {
   display: flex;
   align-items: flex-start;
-  gap: clamp(10px, 1.6vw, 16px);
-  margin-bottom: 18px;
+  gap: 14px;
 }
 
-/* label keeps its own column at every width, narrowing as the viewport does */
 .field-label {
-  width: clamp(96px, 22vw, 170px);
+  width: 140px;
   flex-shrink: 0;
   padding-top: 6px;
-  text-align: end;
+  text-align: start;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.3;
@@ -402,9 +418,13 @@ $border: #dfe4ea;
   overflow-wrap: break-word;
 }
 
+.req {
+  margin-inline-start: 2px;
+  color: #c62828;
+}
+
 .field-control {
   flex: 1 1 auto;
-  align-self: stretch;
   min-width: 0;
 }
 
@@ -435,36 +455,30 @@ $border: #dfe4ea;
 }
 
 /* ---------- attachments ---------- */
-.attach-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-/* the picked-file list lives inside this wrapper, so it needs room to shrink */
-.attach-upload {
-  flex: 0 1 420px;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.attach-mode {
-  flex: 0 0 auto;
+/* upload buttons stretch like the other inputs so every control lines up */
+.field-control :deep(.ant-upload-wrapper),
+.field-control :deep(.ant-upload.ant-upload-select) {
+  display: block;
+  width: 100%;
 }
 
 .attach-btn {
-  min-width: 160px;
-  max-width: 100%;
+  width: 100%;
   text-align: start;
 }
 
-/* long file names stay inside the card instead of widening the row */
-.attach-upload :deep(.ant-upload-list) {
+/* the add / replace choice sits under its upload button */
+.attach-mode {
+  display: block;
+  margin-top: 8px;
+}
+
+/* long file names stay inside the card instead of widening the column */
+.field-control :deep(.ant-upload-list) {
   max-width: 100%;
 }
 
-.attach-upload :deep(.ant-upload-list-item-name) {
+.field-control :deep(.ant-upload-list-item-name) {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -508,60 +522,71 @@ $border: #dfe4ea;
 }
 
 /* ---------- breakpoints ---------- */
-
-/* tablets: label stays beside its control, the column just gets narrower */
-@media (max-width: 767.98px) {
-  .field {
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .attach-upload {
-    flex: 1 1 100%;
-  }
-}
-
-@media (max-width: 575.98px) {
-  .form-card {
-    padding: 18px 12px;
-  }
-
-  .field {
-    gap: 10px;
+/* the two columns get too narrow for label + control, so drop to one */
+@media (max-width: 991.98px) {
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .field-label {
-    padding-top: 7px;
-    font-size: 13px;
+    width: 170px;
+  }
+}
+
+@media (max-width: 639.98px) {
+  .form-card {
+    padding: 18px 14px;
   }
 
-  /* upload trigger and the add/replace choice each get their own line */
-  .attach-row {
-    align-items: flex-start;
-    gap: 10px;
+  .form-grid {
+    row-gap: 16px;
   }
 
-  .attach-btn {
+  /* label above the control, both spanning the full width of the card */
+  .field {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field-label {
+    width: auto;
+    padding-top: 0;
+    text-align: start;
+    font-size: 13.5px;
+  }
+
+  .field-control {
     width: 100%;
-    min-width: 0;
-    text-align: center;
   }
 
+  /* taller touch targets; 16px text stops iOS zooming in on focus */
+  .field-control :deep(.ant-input),
+  .field-control :deep(.ant-select-single .ant-select-selector),
+  .field-control :deep(.ant-picker),
+  .attach-btn {
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .field-control :deep(.ant-select-single .ant-select-selection-item),
+  .field-control :deep(.ant-select-single .ant-select-selection-placeholder) {
+    line-height: 38px;
+  }
+
+  .field-control :deep(.ant-upload-list-item-name) {
+    font-size: 12.5px;
+  }
+
+  /* full-width stacked buttons instead of a cramped right-aligned pair */
   .form-actions {
-    flex-direction: column-reverse;
+    flex-direction: column;
     gap: 8px;
     margin-top: 20px;
   }
 
   .form-actions :deep(.ant-btn) {
     width: 100%;
-  }
-
-  /* 16px keeps iOS Safari from zooming in when a field takes focus */
-  .field-control :deep(.ant-input),
-  .field-control :deep(.ant-select-selector),
-  .field-control :deep(.ant-picker-input > input) {
-    font-size: 16px;
+    height: 42px;
   }
 }
 </style>

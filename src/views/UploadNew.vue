@@ -367,7 +367,7 @@ $border: #dfe4ea;
   width: 140px;
   flex-shrink: 0;
   padding-top: 6px;
-  text-align: end;
+  text-align: start;
   font-size: 14px;
   font-weight: 600;
   color: $ink;

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import dayjs from "dayjs";
 import {
   SearchOutlined,
   FilePdfOutlined,
@@ -28,6 +29,9 @@ const studies = computed(() => getStudies(route.params.slug));
 
 const search = ref("");
 
+/* dayjs month picked in the completion-time filter; null while unset */
+const completionDate = ref(null);
+
 /* ---------- formatting ---------- */
 const FILE_META = {
   pdf: { icon: FilePdfOutlined, label: "PDF", cls: "ft-pdf" },
@@ -49,25 +53,42 @@ const fullDate = (iso) =>
     year: "numeric",
   });
 
-/* ---------- search: topic, type, brand, category---------- */
+/* ---------- filters: search + completion time ---------- */
+const matchesSearch = (s, q) =>
+  [
+    s.topic,
+    s.studyType,
+    s.brand,
+    s.category,
+    monthYear(s.completionTime),
+    String(new Date(s.completionTime).getFullYear()),
+  ]
+    .join(" ")
+    .toLowerCase()
+    .includes(q);
+
+/* Matched by month — the table shows completion time as month + year. */
+const matchesDate = (s, month) =>
+  dayjs(s.completionTime).isSame(month, "month");
+
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase();
-  if (!q) return studies.value;
+  const month = completionDate.value;
+  if (!q && !month) return studies.value;
 
-  return studies.value.filter((s) =>
-    [
-      s.topic,
-      s.studyType,
-      s.brand,
-      s.category,
-      monthYear(s.completionTime),
-      String(new Date(s.completionTime).getFullYear()),
-    ]
-      .join(" ")
-      .toLowerCase()
-      .includes(q)
+  return studies.value.filter(
+    (s) => (!q || matchesSearch(s, q)) && (!month || matchesDate(s, month))
   );
 });
+
+const hasFilters = computed(
+  () => !!search.value.trim() || !!completionDate.value
+);
+
+const clearFilters = () => {
+  search.value = "";
+  completionDate.value = null;
+};
 
 const { page, pageSize, paginated } = usePagination(filtered, { pageSize: 10 });
 
@@ -105,7 +126,7 @@ const openFile = (file) => {
 watch(
   () => route.params.slug,
   () => {
-    search.value = "";
+    clearFilters();
     modalOpen.value = false;
   }
 );
@@ -134,7 +155,7 @@ const goBack = () => router.push({ name: "home" });
 
       
 
-      <!-- ---------- search ---------- -->
+      <!-- ---------- search + date filter ---------- -->
       <div class="toolbar">
         <div class="search-box">
           <SearchOutlined class="search-icon" />
@@ -146,7 +167,27 @@ const goBack = () => router.push({ name: "home" });
             aria-label="Search research studies"
           />
         </div>
-        <span v-if="search" class="result-count">
+
+        <a-date-picker
+          v-model:value="completionDate"
+          class="date-filter"
+          picker="month"
+          format="MMMM YYYY"
+          placeholder="Completion Time"
+          aria-label="Filter by completion time"
+          :allow-clear="true"
+        />
+
+        <button
+          v-if="hasFilters"
+          type="button"
+          class="reset-btn"
+          @click="clearFilters"
+        >
+          Reset
+        </button>
+
+        <span v-if="hasFilters" class="result-count">
           {{ filtered.length }} of {{ studies.length }}
         </span>
       </div>
@@ -232,9 +273,15 @@ const goBack = () => router.push({ name: "home" });
                 <td colspan="10">
                   <div class="table-empty">
                     <InboxOutlined class="empty-icon" />
-                    <p class="empty-title">No studies match “{{ search }}”</p>
-                    <button type="button" class="clear-btn" @click="search = ''">
-                      Clear search
+                    <p class="empty-title">
+                      No studies match the current filters
+                    </p>
+                    <button
+                      type="button"
+                      class="clear-btn"
+                      @click="clearFilters"
+                    >
+                      Clear filters
                     </button>
                   </div>
                 </td>
@@ -406,8 +453,8 @@ $border: #dfe4ea;
 
 .search-box {
   position: relative;
-  flex: 1 1 auto;
-  max-width: 520px;
+  flex: 1 1 0;
+  max-width: 320px;
 }
 
 .search-icon {
@@ -444,6 +491,48 @@ $border: #dfe4ea;
 
   &::-webkit-search-cancel-button {
     cursor: pointer;
+  }
+}
+
+.date-filter {
+  flex: 1 1 0;
+  max-width: 320px;
+  height: 46px;
+  border-radius: 14px;
+  border-color: $brand-50;
+  box-shadow: 0 12px 26px -24px rgba(13, 71, 161, 0.8);
+
+  :deep(input) {
+    font-size: 13.5px;
+    color: $ink;
+
+    &::placeholder {
+      color: #9fb3c8;
+    }
+  }
+
+  &:hover,
+  &:focus-within {
+    border-color: $brand-200;
+  }
+}
+
+.reset-btn {
+  flex-shrink: 0;
+  height: 46px;
+  padding: 0 18px;
+  border: 1px solid $brand-50;
+  border-radius: 14px;
+  background: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: $brand-700;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    background: $brand-50;
+    border-color: $brand-200;
   }
 }
 
@@ -834,6 +923,12 @@ $border: #dfe4ea;
   }
 
   .search-box {
+    max-width: none;
+    flex: 1 1 100%;
+  }
+
+  .date-filter {
+    flex: 1 1 100%;
     max-width: none;
   }
 
